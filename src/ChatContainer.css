@@ -14,7 +14,11 @@ h1 {
 }
 
 form { 
-  background: #34495e; padding: 8px; position: fixed; bottom: 0; width: 100%;
+  background: #34495e;
+  padding: 8px;
+  bottom: 0;
+  width: 100%;
+  z-index: 10;
 }
 
 form input { 
@@ -54,6 +58,11 @@ form button {
 
 .online {
   background: greenyellow;
+}
+
+.chat-container {
+  overflow: auto;
+  flex-grow: 1;
 }
 
 .chat-message {

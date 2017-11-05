@@ -13,7 +13,8 @@ class ChatContainer extends Component {
       input: '',
       loggedIn: false,
       user: '',
-      connected: false
+      connected: false,
+      loaded: false
     };
     this.handleChange = this.handleChange.bind(this);
     this.sendMessage = this.sendMessage.bind(this);
@@ -25,6 +26,7 @@ class ChatContainer extends Component {
   componentDidMount(){
     this.handleMessageEvent();
     this.handleUserEvent();
+    this.setState({ loaded: true});
     const cachedMessages = localStorage.getItem("messages");
     if (cachedMessages) {
       this.setState({ messages: JSON.parse(cachedMessages) });
@@ -34,6 +36,10 @@ class ChatContainer extends Component {
 
   componentDidUpdate(){
     localStorage.setItem("messages", JSON.stringify(this.state.messages));
+    if (this.state.loaded && this.state.loggedIn) {
+      var obj = document.getElementById("chat-container");
+      obj.scrollTop = obj.scrollHeight;
+    }
   }
 
   addMessage(msg){
@@ -96,16 +102,18 @@ class ChatContainer extends Component {
     if (this.state.loggedIn) {
       return (
         <div className="App">
-          <h1>Chat App <span className={`status ${this.state.connected ? 'online' : 'offline' }`}></span></h1>
+          <h1>Chat App <span className={`status ${this.state.connected ? 'online' : 'offline' }`}></span></h1>       
+          <div className="chat-container" id="chat-container">
+            <ul id="messages">{this.state.messages.map((message, id) => {
+              return (
+                <Message key={id} user={message.user} message={message.message} theId={message.user === this.state.user ? "yourMessage" : "otherMessage"}/>
+              )
+            })}
+            </ul>
+          </div> 
           <form onSubmit={this.sendMessage}>  
             <textarea id="message" placeholder="Write message here..." autoComplete="off" value={this.state.input} onChange={this.handleChange} required/><button>Send</button>
-          </form>
-          <ul id="messages">{this.state.messages.map((message, id) => {
-            return (
-              <Message key={id} user={message.user} message={message.message} theId={message.user === this.state.user ? "yourMessage" : "otherMessage"}/>
-            )
-          })}
-          </ul>
+          </form>     
         </div>
       );
     }else {
