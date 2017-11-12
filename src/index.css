@@ -19,3 +19,11 @@ body {
   flex-direction: column;
   justify-content: space-between;
 }
+
+#notifications {
+  display: none;
+  background: rgba(0, 0, 0, 0);
+  color: #bdc3c7;
+  padding: 8px;
+  text-align: center;
+}

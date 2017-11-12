@@ -13,29 +13,32 @@ class ChatContainer extends Component {
       input: '',
       loggedIn: false,
       user: '',
+      usersOnline: [],
       connected: false,
-      loaded: false
+      loaded: false,
+      notification: "nothing"
     };
     this.handleChange = this.handleChange.bind(this);
     this.sendMessage = this.sendMessage.bind(this);
     this.logIn = this.logIn.bind(this);
     this.addMessage = this.addMessage.bind(this);
     this.handleUserEvent = this.handleUserEvent.bind(this);
+    this.showNotification = this.showNotification.bind(this);
   } 
 
   componentDidMount(){
     this.handleMessageEvent();
     this.handleUserEvent();
     this.setState({ loaded: true});
-    const cachedMessages = localStorage.getItem("messages");
-    if (cachedMessages) {
-      this.setState({ messages: JSON.parse(cachedMessages) });
-      return;
-    }
+    // const cachedMessages = localStorage.getItem("messages");
+    // if (cachedMessages) {
+    //   this.setState({ messages: JSON.parse(cachedMessages) });
+    //   return;
+    // }
   }
 
   componentDidUpdate(){
-    localStorage.setItem("messages", JSON.stringify(this.state.messages));
+    // localStorage.setItem("messages", JSON.stringify(this.state.messages));
     if (this.state.loaded && this.state.loggedIn) {
       var obj = document.getElementById("chat-container");
       obj.scrollTop = obj.scrollHeight;
@@ -57,7 +60,8 @@ class ChatContainer extends Component {
       console.log(data);
     })
 
-    socket.on('login', () => {
+    socket.on('login', (data) => {
+      this.setState({usersOnline: data.usersOnline})
       this.setState({connected:true});
     })
 
@@ -65,8 +69,20 @@ class ChatContainer extends Component {
       this.setState({connected:false});
     });
 
+    socket.on('user joined', (data) => {
+      this.setState({usersOnline: data.usersOnline});
+      if (this.state.loggedIn) {
+        this.setState({notification:`${data.username} Joined the chat`});
+        this.showNotification(data.username);
+      }   
+    });
+
     socket.on('user left', (data) => {
-      console.log(data);
+      this.setState({usersOnline: data.usersOnline});
+      if (this.state.loggedIn) {
+        this.setState({notification:`${data.username} Left the chat`});
+        this.showNotification(data.username);
+      } 
     })
   } 
   
@@ -80,9 +96,20 @@ class ChatContainer extends Component {
     
   }
 
+  showNotification(data) {
+    console.log("show");
+    // document.getElementById("notifications").style.display="block";
+    // setTimeout(function(){
+    //   document.getElementById("notifications").style.display="none";
+    // },5000)
+  }
+
   logIn(event) {
     if (this.state.user.length > 0) {
       socket.emit('add user', this.state.user);
+      var usersArray = this.state.usersOnline;
+      usersArray.push(this.state.user);
+      this.setState({ usersOnline: usersArray });
       this.setState({ loggedIn: true })
     }
     event.preventDefault();
@@ -102,7 +129,10 @@ class ChatContainer extends Component {
     if (this.state.loggedIn) {
       return (
         <div className="App">
-          <h1>Chat App <span className={`status ${this.state.connected ? 'online' : 'offline' }`}></span></h1>       
+          <h1>Chat App <span className={`status ${this.state.connected ? 'online' : 'offline' }`}></span></h1>
+          <div id="notifications">
+            <p>{this.state.notification}</p>
+          </div>
           <div className="chat-container" id="chat-container">
             <ul id="messages">{this.state.messages.map((message, id) => {
               return (
@@ -110,7 +140,15 @@ class ChatContainer extends Component {
               )
             })}
             </ul>
-          </div> 
+          </div>
+          <div className="users-online">
+            <span>Users online: </span>
+            {this.state.usersOnline.map((item, id) => {
+              return (
+                <p key={id}>{item}</p>
+              )
+            })}
+          </div>
           <form onSubmit={this.sendMessage}>  
             <textarea id="message" placeholder="Write message here..." autoComplete="off" value={this.state.input} onChange={this.handleChange} required/><button>Send</button>
           </form>     

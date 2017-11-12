@@ -98,6 +98,17 @@ form button {
   margin-top: 9px;
 }
 
+.users-online {
+  padding: 8px;
+  background: #34495e;
+  color: rgba(255, 255, 255, 0.619);
+}
+
+.users-online p {
+  display: inline-block;
+  margin-right: 8px;
+}
+
 #messages {
   list-style-type: none; margin: 0; padding: 0;
   width:100%;
