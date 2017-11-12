@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import './ChatContainer.css';
 import openSocket from 'socket.io-client';
 import Message from './Message';
-const socket = openSocket('http://192.168.178.20:7777');
+const socket = openSocket('https://chat-app-1337.herokuapp.com/');
 
 class ChatContainer extends Component {
 
